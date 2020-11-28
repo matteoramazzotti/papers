@@ -58,3 +58,35 @@ segments(rep(1,10),ecodata[11:20,5],rep(2,10),ecodata[1:10,5],col=c)
 legend("topleft",legend=table(c),text.col=c("blue","red"),bty="n")
 dev.off()
 
+### figure 7
+dend<-as.dendrogram(hclust(dist(sqrt(t(otu_table(data.prop))))))
+col<-ifelse(sample_data(data.prop)$Disease[o]=="NI","blue","red")
+o<-match(labels(dend),sample_names(data.prop))
+newlab<-ifelse(o>=10,o-10,o)
+labels(dend)<-paste0("S",newlab)
+labels_colors(dend)<-col
+plot(dend,main=paste0("Complete clustering of Euclidean distance on\n sqrt transformed OTU percent abundance"))
+text(18,10,"NI",col="blue",cex=1.2)
+text(19,10,"I",col="red",cex=1.2)
+
+pcoa<-pcoa(vegdist(t(otu_table(data.prop))))
+plot(pcoa$vectors[,1],pcoa$vectors[,2],pch=".",main=paste0("PCoA of Bray-Curtis Distance\n on sqrt OTU abundance %"),xlab="PC1",ylab= "PC2")
+text(pcoa$vectors[,1],pcoa$vectors[,2],paste0("S",rep(1:10,2)),col=ifelse(sample_data(data.prop)$Disease=="NI","blue","red"))
+
+center1 <- apply(pcoa$vectors[1:10,1:2], 2, mean)
+cov_mat1 <- cov(pcoa$vectors[1:10,1:2])
+center2 <- apply(pcoa$vectors[11:20,1:2], 2, mean)
+cov_mat2 <- cov(pcoa$vectors[11:20,1:2])
+ellipse(center1, cov_mat1, center.pch=0, col="blue", fill=TRUE, fill.alpha=0.1,lty=0, radius=sqrt(2 * qf(.95, 2, 9999)),add=T)
+ellipse(center2, cov_mat2, center.pch=0, col="red", fill=TRUE, fill.alpha=0.1, lty=0, radius=sqrt(2 * qf(.95, 2, 9999)),add=T)
+
+center1 <- apply(pcoa$vectors[c(1:3,5:10),1:2], 2, mean)
+cov_mat1 <- cov(pcoa$vectors[c(1:3,5:10),1:2])
+center2 <- apply(pcoa$vectors[c(11:13,15:20),1:2], 2, mean)
+cov_mat2 <- cov(pcoa$vectors[c(11:13,15:20),1:2])
+ellipse(center1, cov_mat1, center.pch=0, lty=4,col="blue", radius=sqrt(2 * qf(.95, 2, 9999)),add=T)
+ellipse(center2, cov_mat2, center.pch=0, lty=4,col="red", radius=sqrt(2 * qf(.95, 2, 9999)),add=T)
+dev.off()
+
+### 
+coord_plot(data,rank="Phylum",num=5,col=c(rep("blue",10),rep("orange",10)),legnames=c("NI","I"),legcol=c("blue","orange"),exclude="Cyanobacteria/Chloroplast",exclude_noname=T)

@@ -55,7 +55,7 @@ data.threshold<-function(data,rank="Phylum",thr=0.5,prop=50,method=c("mean","maj
 	data.filt
 }
 			 
-coord_plot<-function(original,rank="Phylum",num=5,col="black",legnames=null,legcol=null,exclude=NULL,include=NULL,exclude_noname=F) {
+coord_plot<-function(original,rank="Phylum",num=5,col="black",lty=1,legnames=null,legcol=null,exclude=NULL,include=NULL,exclude_noname=F) {
 	i_data<-tax_glom(original, taxrank = rank, NArm = F)
 	data<-transform_sample_counts(i_data, function(otu) otu/sum(otu)*100)
 	d<-otu_table(data)[order(rowMeans(otu_table(data)),decreasing=T),]
@@ -79,22 +79,14 @@ coord_plot<-function(original,rank="Phylum",num=5,col="black",legnames=null,legc
 			par(mar=c(12,4,4,1))
 			plot(1:num,d[,i],axes=F,type="l",ylim=ylim,col=col[i],xlab="",ylab="Abundance %",main=paste("Coordinate plot of top",num,rank))
 		} else {
-			lines(1:num,d[,i],col=col[i])
+			lines(1:num,d[,i],col=col[i],lty=lty[i])
 		}
 	}
 	if(!is.null(legnames)) {
-		legend("topright",legnames,lty=1,bty="n",col=legcol)
+		legend("topright",legnames,lty=unique(lty),bty="n",col=legcol)
 	}
 	axis(1,1:num,t,las=2)
 	axis(2)
 	list(d,t)
 }
-pdf(file="coordinate_plot.pdf",width=10,height=10)
-par(mfrow=c(2,2))
-coord_plot(data,rank="Phylum",num=5,col=c(rep("blue",10),rep("orange",10)),legnames=c("NI","I"),legcol=c("blue","orange"))
-coord_plot(data,rank="Class",num=5,col=c(rep("blue",10),rep("orange",10)),legnames=c("NI","I"),legcol=c("blue","orange"))
-coord_plot(data,rank="Order",num=5,col=c(rep("blue",10),rep("orange",10)),legnames=c("NI","I"),legcol=c("blue","orange"))
-coord_plot(data,rank="Family",num=5,col=c(rep("blue",10),rep("orange",10)),legnames=c("NI","I"),legcol=c("blue","orange"))
-coord_plot(data,rank="Genus",num=5,col=c(rep("blue",10),rep("orange",10)),legnames=c("NI","I"),legcol=c("blue","orange"))
-dev.off()
-
+				      

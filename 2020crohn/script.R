@@ -20,6 +20,14 @@ data.order = tax_glom(data, taxrank = "Order", NArm = F)
 data.family = tax_glom(data, taxrank = "Family", NArm = F)
 data.genus = tax_glom(data, taxrank = "Genus", NArm = F)
 
+### DATA IS NORMALIZED IN COLUMN PERCENT
+data.prop <- transform_sample_counts(data, function(otu) otu/sum(otu)*100)
+data.phylum.prop <- transform_sample_counts(data.phylum, function(otu) otu/sum(otu)*100)
+data.class.prop <- transform_sample_counts(data.class, function(otu) otu/sum(otu)*100)
+data.order.prop <- transform_sample_counts(data.order, function(otu) otu/sum(otu)*100)
+data.family.prop <- transform_sample_counts(data.family, function(otu) otu/sum(otu)*100)
+data.genus.prop <- transform_sample_counts(data.genus, function(otu) otu/sum(otu)*100)
+
 ### EXPORT ABUNDANCE TABLES
 write.table(cbind(as(otu_table(data.phylum),"matrix"),as(tax_table(data.phylum),"matrix")),file="plots/counts_phylum.txt",sep="\t")
 write.table(cbind(as(otu_table(data.class),"matrix"),as(tax_table(data.class),"matrix")),file="plots/counts_class.txt",sep="\t")
@@ -58,35 +66,38 @@ segments(rep(1,10),ecodata[11:20,5],rep(2,10),ecodata[1:10,5],col=c)
 legend("topleft",legend=table(c),text.col=c("blue","red"),bty="n")
 dev.off()
 
-### figure 7
+### FIGURE 4A
+coord_plot(data,rank="Phylum",num=5,col=c(rep("blue",10),rep("orange",10)),lty=c(rep(1,10),rep(2,10)),legnames=c("NI","I"),legcol=c("blue","orange"),exclude="Cyanobacteria/Chloroplast",exclude_noname=T)
+
+### FIGURE 4B
+library(dendextend)
 dend<-as.dendrogram(hclust(dist(sqrt(t(otu_table(data.prop))))))
-col<-ifelse(sample_data(data.prop)$Disease[o]=="NI","blue","red")
+col<-ifelse(sample_data(data.prop)$Disease[o]=="NI","blue","orange")
 o<-match(labels(dend),sample_names(data.prop))
 newlab<-ifelse(o>=10,o-10,o)
 labels(dend)<-paste0("S",newlab)
 labels_colors(dend)<-col
 plot(dend,main=paste0("Complete clustering of Euclidean distance on\n sqrt transformed OTU percent abundance"))
 text(18,10,"NI",col="blue",cex=1.2)
-text(19,10,"I",col="red",cex=1.2)
+text(19,10,"I",col="orange",cex=1.2)
 
+#FIGURE 4c
+library(car)
 pcoa<-pcoa(vegdist(t(otu_table(data.prop))))
 plot(pcoa$vectors[,1],pcoa$vectors[,2],pch=".",main=paste0("PCoA of Bray-Curtis Distance\n on sqrt OTU abundance %"),xlab="PC1",ylab= "PC2")
-text(pcoa$vectors[,1],pcoa$vectors[,2],paste0("S",rep(1:10,2)),col=ifelse(sample_data(data.prop)$Disease=="NI","blue","red"))
+text(pcoa$vectors[,1],pcoa$vectors[,2],paste0("S",rep(1:10,2)),col=ifelse(sample_data(data.prop)$Disease=="NI","blue","orange"))
 
 center1 <- apply(pcoa$vectors[1:10,1:2], 2, mean)
 cov_mat1 <- cov(pcoa$vectors[1:10,1:2])
 center2 <- apply(pcoa$vectors[11:20,1:2], 2, mean)
 cov_mat2 <- cov(pcoa$vectors[11:20,1:2])
 ellipse(center1, cov_mat1, center.pch=0, col="blue", fill=TRUE, fill.alpha=0.1,lty=0, radius=sqrt(2 * qf(.95, 2, 9999)),add=T)
-ellipse(center2, cov_mat2, center.pch=0, col="red", fill=TRUE, fill.alpha=0.1, lty=0, radius=sqrt(2 * qf(.95, 2, 9999)),add=T)
+ellipse(center2, cov_mat2, center.pch=0, col="orange", fill=TRUE, fill.alpha=0.1, lty=0, radius=sqrt(2 * qf(.95, 2, 9999)),add=T)
 
 center1 <- apply(pcoa$vectors[c(1:3,5:10),1:2], 2, mean)
 cov_mat1 <- cov(pcoa$vectors[c(1:3,5:10),1:2])
 center2 <- apply(pcoa$vectors[c(11:13,15:20),1:2], 2, mean)
 cov_mat2 <- cov(pcoa$vectors[c(11:13,15:20),1:2])
 ellipse(center1, cov_mat1, center.pch=0, lty=4,col="blue", radius=sqrt(2 * qf(.95, 2, 9999)),add=T)
-ellipse(center2, cov_mat2, center.pch=0, lty=4,col="red", radius=sqrt(2 * qf(.95, 2, 9999)),add=T)
+ellipse(center2, cov_mat2, center.pch=0, lty=4,col="orange", radius=sqrt(2 * qf(.95, 2, 9999)),add=T)
 dev.off()
-
-### 
-coord_plot(data,rank="Phylum",num=5,col=c(rep("blue",10),rep("orange",10)),legnames=c("NI","I"),legcol=c("blue","orange"),exclude="Cyanobacteria/Chloroplast",exclude_noname=T)

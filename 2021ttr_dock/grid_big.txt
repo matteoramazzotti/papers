@@ -1,0 +1,4 @@
+4mrb_ok
+spacing    0.558
+npts       126 84 100
+center     0.000 20.660 -14.927

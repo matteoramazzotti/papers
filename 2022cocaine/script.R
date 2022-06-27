@@ -1,3 +1,5 @@
+#### R script by Leandro di Gloria ###
+
 #################### PREPARING THE ENVIRONMENT #################
 
 library("phyloseq")
